@@ -1,0 +1,70 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Definisi parameter
+h = 0.1  # langkah
+t_end = 3  # batas atas
+t_start = 0  # batas bawah
+y0 = 1  # nilai awal
+
+# Fungsi turunan
+def f(t, y):
+    return y * (np.sin(t)**3)
+
+# Metode Heun (Euler Modifikasi)
+def heun_method(f, t_start, t_end, y0, h):
+    n = int((t_end - t_start) / h) + 1  # jumlah langkah
+    t = np.linspace(t_start, t_end, n)  # array waktu
+    y = np.zeros(n)  # array solusi
+    y[0] = y0  # kondisi awal
+
+    for i in range(1, n):
+        t_i = t[i-1]
+        y_i = y[i-1]
+
+        # Langkah prediksi (Euler)
+        y_predict = y_i + h * f(t_i, y_i)
+
+        # Langkah koreksi
+        y[i] = y_i + (h / 2) * (f(t_i, y_i) + f(t_i + h, y_predict))
+
+    return t, y
+
+# Solusi eksak
+def exact_solution(t):
+    return np.exp(2/3) * np.exp(-np.cos(t) + (np.cos(t)**3)/3)
+
+# Hitung solusi numerik (Heun)
+t, y_numerik = heun_method(f, t_start, t_end, y0, h)
+
+# Hitung solusi eksak
+y_eksak = exact_solution(t)
+
+# Hitung error
+error_absolut = np.abs(y_numerik - y_eksak)
+error_relatif = np.abs(y_numerik - y_eksak) / np.abs(y_eksak)
+
+# Menampilkan tabel hasil
+print("t          y_numerik     y_eksak        Error Absolut   Error Relatif")
+print("-------------------------------------------------------------------")
+for i in range(len(t)):
+    print(f"{t[i]:.2f}     {y_numerik[i]:.6f}   {y_eksak[i]:.6f}   {error_absolut[i]:.6e}   {error_relatif[i]:.6e}")
+
+# Plot hasil
+plt.plot(t, y_numerik, label="Heun (Numerik)", linestyle="--")
+plt.plot(t, y_eksak, label="Solusi Eksak")
+plt.xlabel("t")
+plt.ylabel("y(t)")
+plt.title("Perbandingan Solusi Numerik dan Eksak (Metode Heun)")
+plt.legend()
+plt.grid()
+plt.show()
+
+# Plot error
+plt.plot(t, error_absolut, label="Error Absolut")
+plt.xlabel("t")
+plt.ylabel("Error")
+plt.title("Error Absolut (Heun vs Eksak)")
+plt.legend()
+plt.grid()
+plt.show()
